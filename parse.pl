@@ -31,24 +31,71 @@ my @data2;
 foreach my $e ( @data ) {
     my $email = $e->{Email};
     #say 'e:', $email;
+
     $email =~ s/^\s*\S//;
     $email =~ s/\s*$//; #(\S.*\S)\s*$/$1/g;
-    if( 0 && $email =~ m/\s|,/ ) {
-        #say "\tHere " , $email;
-        $e->{mixed} = $email;
-        delete $e->{Email}; # = undef;
+
+    $email =~ s/\s+\[at\]\s+/@/g;
+    $email =~ s/\s+\[dot\]\s+/./g;
+
+    $email =~ s/\s+@/@/g;         ####  aggavet @waggavet.com.au
+
+    my @parts = split /\s+/, $email;
+
+    if( @parts > 1 ) {
+        my @emails = ();
+        my @webs = ();
+        foreach my $e0 (@parts) {
+            next if $e0 eq 'or';
+            if( $e0 =~ m/@/ ) {
+                push @emails, $e0;
+            } else {
+                push @webs, $e0;
+            }
+        }
+
+        #say "\t$email";
+        if( $e->{Website} ne '' and @webs ) {
+            say ':', $e->{Website}, ':';
+            die 'not empty web' ;
+        }
+        #say "\tEM:", join ',', @emails;
+        #say "\tWEB:", join ',', @webs;
+
+        $e->{Email} = join ', ', @emails;
+        $e->{Website} = join ', ', @webs if @webs;
+    } else {
+        $e->{Email} = $email;
     }
-    $e->{Email} = $email;
+    #say $e->{Email};
+
 
     my $address = $e->{'**address'};
-    #say '        ', $address;
+    say $address;
+
+    my $State = uc $e->{State};
+    $address =~ s/,?\s*${State}\b//g;
+
     if( $address =~ m/\D(\d+)$/ ) {
         $e->{Postcode} = $1;
         $address =~ s/,?\s*\d+$//;
-        $e->{'**address'} = $address;
     }
 
+    say $e->{State}, ':', $address, "\t\t", $e->{Postcode};
+    say "\t$address";
+   
+    my( $al1, $al2, @al3 ) = split /,\s*/, $address;
+say 'Al1:', $al1, ' Al2:', $al2, ' Itog:', join '::', @al3;
+
+    $e->{AddrLine1} = $al1;
+    $e->{AddrLine2} = $al2;
+    $e->{AddrLine3} = join ', ', @al3;
     #printf '%7d %s'."\n", $e->{postcode} || '', $e->{address};
+
+
+    # $e->{'**address'} = $address;
+
+###
 
     #say $e->{contact}; 
     my @contacts = split/\s*(,|and)\s*/, $e->{contact};
@@ -103,8 +150,9 @@ my @list = qw/Institution
               Surname
               State
               Region
-              Street
-              City
+              AddrLine1
+              AddrLine2
+              AddrLine3
               **address
               Postcode
               Phone
