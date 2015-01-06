@@ -30,9 +30,9 @@ foreach my $line (split /\n/, $output ) {
 my @data2;
 foreach my $e ( @data ) {
     my $email = $e->{Email};
-    #say 'e:', $email;
+    #say $email;
 
-    $email =~ s/^\s*\S//;
+    $email =~ s/^\s*S//;
     $email =~ s/\s*$//; #(\S.*\S)\s*$/$1/g;
 
     $email =~ s/\s+\[at\]\s+/@/g;
@@ -40,6 +40,8 @@ foreach my $e ( @data ) {
 
     $email =~ s/\s+@/@/g;         ####  aggavet @waggavet.com.au
 
+#    say $email;
+#next;
     my @parts = split /\s+/, $email;
 
     if( @parts > 1 ) {
@@ -70,10 +72,18 @@ foreach my $e ( @data ) {
     #say $e->{Email};
 
 
+
     my $address = $e->{'**address'};
-    say $address;
+    #say $address;
+
+
+    my $Region = ucfirst $e->{Region};
+    $e->{Region} = $Region;
 
     my $State = uc $e->{State};
+    $e->{State} = $State;
+
+
     $address =~ s/,?\s*${State}\b//g;
 
     if( $address =~ m/\D(\d+)$/ ) {
@@ -81,11 +91,11 @@ foreach my $e ( @data ) {
         $address =~ s/,?\s*\d+$//;
     }
 
-    say $e->{State}, ':', $address, "\t\t", $e->{Postcode};
-    say "\t$address";
+    #say $e->{State}, ':', $address, "\t\t", $e->{Postcode};
+#    say "\t$address";
    
     my( $al1, $al2, @al3 ) = split /,\s*/, $address;
-say 'Al1:', $al1, ' Al2:', $al2, ' Itog:', join '::', @al3;
+#say 'Al1:', $al1, ' Al2:', $al2, ' Itog:', join '::', @al3;
 
     $e->{AddrLine1} = $al1;
     $e->{AddrLine2} = $al2;
